@@ -86,7 +86,7 @@ class DatabaseManager:
             return False
     def create_prodcut(self,data: dict):
         try: 
-            self.__cur.execute("INSERT INTO products(name, photo, price, count, description, chat_id)",
+            self.__cur.execute("INSERT INTO products(name, photo, price, count, description, chat_id) VALUES(?,?,?,?,?,?)",
             (data.get("name"), data.get("photo"), data.get("price"), data.get("count"), data.get("description"), data.get("chat_id")))
             self.__con.commit()
             return True
@@ -94,3 +94,9 @@ class DatabaseManager:
             print(ex)
             return False
         
+    def get_products_by_chat_id(self, chat_id):
+        try:
+            return self.__cur.execute("SELECT * FROM products WHERE chat_id=?", (chat_id, )).fetchall()
+        except Exception as ex:
+            print(ex)
+            return False   

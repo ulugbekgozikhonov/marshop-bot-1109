@@ -105,6 +105,25 @@ async def add_product_name_handler(message:types.Message,state:FSMContext):
     else:
         await message.answer("Prodcut create error!!!!")
     await state.finish()
+    
+@dp.message_handler(text="Show Product")
+async def show_product_handler(message:types.Message):
+    products=  database.get_products_by_chat_id(message.chat.id)
+    if products:
+       for product in products:
+           name = product[1]
+           photo = product[2]
+           count = product[3]
+           price = product[4]
+           description = product[5]
+           await message.answer_photo(photo=photo, 
+                                      caption=f"""
+Product Name: {name}
+Product Count: {count}
+Product Price: {price}
+Description: {description}""")
+    else:
+        await message.answer("Product not found")
         
 
 if __name__ == "__main__":

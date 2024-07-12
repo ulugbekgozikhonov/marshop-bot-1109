@@ -1,3 +1,4 @@
+from aiogram.dispatcher.filters import Text
 from aiogram import Bot,Dispatcher,executor,types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
@@ -9,6 +10,7 @@ logging.basicConfig(level=logging.INFO)
 from state import *
 from database import DatabaseManager
 
+from inline_btn import *
 BOT_TOKEN = "6835217351:AAF_0A6xl_Ag2S3jA4byQo8-J18s3BQCT8k"
 
 bot = Bot(token=BOT_TOKEN,parse_mode="HTML")
@@ -108,25 +110,94 @@ async def add_product_name_handler(message:types.Message,state:FSMContext):
     
 @dp.message_handler(text="Show Product")
 async def show_product_handler(message:types.Message):
-    products=  database.get_products_by_chat_id(message.chat.id)
+    start = 1
+    chat_id = message.chat.id
+    over = database.get_products_count_by_chat_id(chat_id)
+    end = over if over<4 else 4
+    
+    text = f"Natijalar {start}-{end} {over} dan\n\n"
+    products = database.get_products_by_chat_id(chat_id,4,0)
+
     if products:
-       for product in products:
-           name = product[1]
-           photo = product[2]
-           count = product[3]
-           price = product[4]
-           description = product[5]
-           await message.answer_photo(photo=photo, 
-                                      caption=f"""
+        for i,product in enumerate(products):
+            text+=f"{i+1}.<b>{product[1]}</b>-{product[5]}\n"
+        await message.answer(text=text,reply_markup=show_product_btn(end))
+    else:
+        await message.answer("Products not found")
+
+@dp.callback_query_handler(Text(startswith="btn_"))
+async def products_handler(call: types.CallbackQuery):
+    btn_number = call.data
+    text = ""
+    number = 2
+    chat_id = call.message.chat.id
+    if btn_number == "btn_1":
+        text = call.message.text.split("\n")
+        number = 2
+    elif btn_number == "btn_2":
+        text = call.message.text.split("\n")
+        number = 3
+    elif btn_number == "btn_3":
+        text = call.message.text.split("\n")
+        number = 4
+    elif btn_number == "btn_4":
+        text = call.message.text.split("\n")
+        number = 5
+        
+    product_name = await get_book_by_keyboard(text,number)
+    product = database.get_products_by_chat_id_and_name(chat_id,product_name)
+    if product:
+        name = product[1]
+        photo = product[2]
+        count = product[3]
+        price = product[4]
+        description = product[5]
+        await call.message.answer_photo(photo=photo, 
+                                    caption=f"""
 Product Name: {name}
 Product Count: {count}
 Product Price: {price}
-Description: {description}""")
+Description: {description}""", reply_markup=product_button)
     else:
-        await message.answer("Product not found")
-        
+        await call.message.answer("Product not found")
+    await call.answer()
+
+    
+    
+    
+# @dp.callback_query_handler(text="orqaga")
+# async def oraqaga_handler(call:types.CallbackQuery):
+#     # print(call)
+#     data = call.message.text
+#     print(data)
+
+
+# @dp.callback_query_handler(text="delete")
+# async def oraqaga_handler(call:types.CallbackQuery):
+#     pass
+
+
+# @dp.callback_query_handler(text="oldinga")
+# async def oraqaga_handler(call:types.CallbackQuery):
+#     pass
+
+
+@dp.message_handler(text="MARS Shop")
+async def mars_show_handler(message:types.Message):
+    await message.answer(database.get_product_by_status())
+    
+
+
+@dp.message_handler(text="Back to") 
+async def  back_to_shop_menu_handler(message:types.Message):
+    await message.answer("Shop menu ", reply_markup=shop_menu)
+
+
+async def get_book_by_keyboard(text,number):
+    product_name = text[number]
+    index = product_name.index("-")
+    return(product_name[2:index])
 
 if __name__ == "__main__":
     executor.start_polling(dp,skip_updates=True,on_startup=on_startup,on_shutdown=on_shutdown)
-
 

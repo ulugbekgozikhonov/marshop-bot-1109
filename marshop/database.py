@@ -1,7 +1,9 @@
-# import sqlite3
+import sqlite3
 
-# con = sqlite3.connect("marshop.db")
-# cur = con.cursor()
+con = sqlite3.connect("marshop.db")
+cur = con.cursor()
+
+print(cur.execute("Select Count(*) from products ").fetchone())
 
 # def connext():
 #     con = sqlite3.connect("marshop.db")
@@ -94,9 +96,29 @@ class DatabaseManager:
             print(ex)
             return False
         
-    def get_products_by_chat_id(self, chat_id):
+    def get_products_by_chat_id(self, chat_id,limit,offset):
         try:
-            return self.__cur.execute("SELECT * FROM products WHERE chat_id=?", (chat_id, )).fetchall()
+            return self.__cur.execute(f"SELECT * FROM products WHERE chat_id=? LIMIT {limit} OFFSET {offset} ", (chat_id, )).fetchall()
         except Exception as ex:
             print(ex)
-            return False   
+            return False  
+    
+    def get_products_count_by_chat_id(self,chat_id):
+        try:
+            return self.__cur.execute(f"SELECT COUNT(*) FROM products WHERE chat_id=? ", (chat_id, )).fetchone()[0]
+        except Exception as ex:
+            print(ex)
+            return False  
+
+    def get_product_by_status(self):
+        try:
+            return self.__cur.execute("SELECT * FROM products WHERE status=?",(True,)).fetchall()
+        except Exception as ex:
+            print(ex)
+            return False  
+    def get_products_by_chat_id_and_name(self,chat_id,name):
+        try:
+            return self.__cur.execute("SELECT * FROM products WHERE chat_id=? and name=?",(chat_id,name)).fetchone()
+        except Exception as ex:
+            print(ex)
+            return False  

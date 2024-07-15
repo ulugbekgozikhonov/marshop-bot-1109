@@ -3,7 +3,7 @@ import sqlite3
 con = sqlite3.connect("marshop.db")
 cur = con.cursor()
 
-print(cur.execute("Select Count(*) from products ").fetchone())
+# print(cur.execute("Select Count(*) from products ").fetchone())
 
 # def connext():
 #     con = sqlite3.connect("marshop.db")

@@ -13,7 +13,8 @@ from database import DatabaseManager
 from inline_btn import *
 BOT_TOKEN = "6835217351:AAF_0A6xl_Ag2S3jA4byQo8-J18s3BQCT8k"
 
-bot = Bot(token=BOT_TOKEN,parse_mode="HTML")
+PROXY_URL = "http://proxy.server:3128"
+bot = Bot(token=BOT_TOKEN,parse_mode="HTML",proxy=PROXY_URL)
 storage = MemoryStorage()
 dp = Dispatcher(bot=bot,storage=storage)
 
@@ -161,6 +162,7 @@ Description: {description}""", reply_markup=product_button)
     else:
         await call.message.answer("Product not found")
     await call.answer()
+
 
     
     
